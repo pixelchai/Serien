@@ -197,6 +197,7 @@ public class SlangFile {
             case '+':
                 //local variable access
                 sr.increment();
+                //System.out.println(context.variables);
                 return context.getVariable(sr.readWord());
             case '"':
                 //string literal
@@ -295,7 +296,7 @@ public class SlangFile {
                 name=sr.readWord();
                 break;
         }
-
+        //FIXME BIG PROBLEM HERE!!
         sr.skipWhitespace();
         List l = (List)this.interpretExpression(context,sr);
 

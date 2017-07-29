@@ -19,13 +19,13 @@ public class SlangContext {
     this.parentContext = parentContext;
     }
 
-    public Object getVariable(String varname){
+    public Object getVariable(String varname) throws SlangException {
         SlangContext c = this;
         while(c != null) {
             if(c.variables.containsKey(varname))return c.variables.get(varname);
             else c = c.parentContext;
         }
-        return null;
+        throw new SlangException("Could not find variable \""+varname+"\"");
     }
 
     public Object getParam(String param){
