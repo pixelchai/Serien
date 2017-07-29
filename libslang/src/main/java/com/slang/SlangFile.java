@@ -81,17 +81,18 @@ public class SlangFile {
                     finnext=true;
                 }
             }
+            else if((raw.charAt(i)=='\n'||i==raw.length()-1)&&finnext){
+                finnext=false;
+                //fin
+                methods.put(buf.name,buf);
+                buf = new SlangMethod();
+                buf.raw = "";
+            }
             else if(raw.charAt(i)=='\n'){
                 if(name != null) {
                     buf.name = name.trim();
                     name = null;
                     buf.baseIndex=i;
-                }else if(finnext){
-                    finnext=false;
-                    //fin
-                    methods.put(buf.name,buf);
-                    buf = new SlangMethod();
-                    buf.raw = "";
                 }else{
                     buf.raw+='\n';
                 }
@@ -108,12 +109,11 @@ public class SlangFile {
         this.interpretMethod("init");
     }
     public Object interpretMethod(String name, Object... args) throws Exception {
-        SlangMethod method;
-        try {
-            method = methods.get(name);
-        }catch (Exception e){
-            throw new SlangException(filename,null,"Expected method \""+name+"\"",e);
-        } //load method
+        SlangMethod method = methods.get(name);
+        if(method == null){
+            throw new SlangException(filename,null,"Could not find method \""+name+"\"",null);
+        }
+        //load method
             SlangReader sr = new SlangReader(method.raw, method.baseIndex);
         try {
             SlangContext context = new SlangContext(globalContext);
@@ -296,7 +296,6 @@ public class SlangFile {
                 name=sr.readWord();
                 break;
         }
-        //FIXME BIG PROBLEM HERE!!
         sr.skipWhitespace();
         List l = (List)this.interpretExpression(context,sr);
 
