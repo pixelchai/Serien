@@ -69,7 +69,7 @@ public class SlangReader {
         }
     }
     public boolean isWordChar(char c){
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '-' || c == '+' || c == '.';
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' /*|| c == '-' *|| c == '+' || c == '.'*/;
     }
     public String readWord(){
         skipWhitespace();

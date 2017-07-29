@@ -51,6 +51,21 @@ public class SlangFile {
                     }
                 }
             }
+            else if(raw.charAt(i)=='\"'){
+                buf.raw+=raw.charAt(i);
+                i+=1;
+                //skip to end of quote
+                for(i=i;i<raw.length();i++){
+                    char c = raw.charAt(i);
+                    buf.raw+=c;
+                    if(c=='\\'){
+                        i+=1;
+                        buf.raw+=raw.charAt(i);//if this is a " it will be added and skipped (since it is not the end of string)
+                    }else if(c=='"'){
+                        break;
+                    }
+                }
+            }
             else if(raw.charAt(i)=='-'){
                 if(!open){
                     open = true;

@@ -37,27 +37,28 @@ public class HomeActivity extends AppCompatActivity {
 //TODO https://stackoverflow.com/questions/8288218/how-to-wait-for-a-thread-to-finish-before-another-thread-starts-in-java-android
         new Thread(new Runnable() {
             public void run() {
-                String file = ";ra\n" +
-                        "-init\n" +
-                        ";reie\n" +
-                        "@title \"animeheaven\"\n" +
+                String file = "-init\n" +
+                        "@title \"MyAnimeList\"\n" +
                         "@by \"syanochara\"\n" +
                         "@type 1\n" +
-                        "@base \"http://animeheaven.eu/\"\n" +
+                        "@base \"https://myanimelist.net/\"\n" +
                         "-\n" +
-                        "-yo-\"yo\"\n" +
                         "\n" +
-                        "-search\n" +
-                        "#e (yo)\n" +
-                        "#b ($load ($concat \"http://animeheaven.eu/search.php?q=\" %0))\n" +
-                        ";#names ([ 1 ($ +b \".iepdes\"))\n" +
-                        "#names ~($text ($ +b \".iepdes\"))\n" +
-                        "#links ~($precat ~($attr ($ +b \".ieppic .an\") \"href\") +base)\n" +
-                        "#imgs ~($precat ~($attr ($ +b \".ieppic .an img\") \"src\") +base)\n" +
-                        "- [+links +names +imgs]\n" +
+                        "-home\n" +
+                        "-[\"hseasonal\"]\n" +
                         "\n" +
-                        ";-search- [(~ ($ ($load \"url\") \".iepdes\") innerText) (~ ($ ($load \"url\") \".iepdes\") innerText) (~ ($ ;($load \"url\") \".ieppic .an\") getAttr \"src\") (~ ($ ($load \"url\") \".ieppic .an img\") getAttr \"src\")]\n" +
-                        "\n";
+                        "-hseasonal\n" +
+                        "#b ($load ($concat +base \"anime/season\"))\n" +
+                        "#links ~($attr ($ b \".seasonal-anime .title-text a\") \"href\")\n" +
+                        "#titles ~($text ($ b \".seasonal-anime .title-text\"))\n" +
+                        "#images ~($attr ($ b \".seasonal-anime .image img\") \"src\")\n" +
+                        "#info ~(seasonal_getstat ($ b \".seasonal-anime\"))\n" +
+                        "-[0 +links +titles +images +info null]\n" +
+                        "\n" +
+                        "-seasonal_getstat\n" +
+                        "#eps [($text ([ ($ %0 \".eps\"))) null]\n" +
+                        "#score [($trim ($text ([ ($ %0 \".score\")))) \"stars\"]\n" +
+                        "- [+eps +score]";
                 try {
                     com.slang.SourceSlangFile f = new com.slang.SourceSlangFile(null, file);
 
@@ -67,7 +68,7 @@ public class HomeActivity extends AppCompatActivity {
 
                     f.init();
                     //TODO DO THIS: java.net.URLEncoder.encode("Hello World", "UTF-8"));
-                    ArrayList<ArrayList<String>> l = f.doSearch("fullmetal");
+                    ArrayList<Object> l = (ArrayList<Object>)f.interpretMethod("hseasonal");
                     System.out.println(l);
                 }catch (Exception e){
                     System.err.println(e.getMessage());
