@@ -20,11 +20,11 @@ public class Slang {
                 "\n" +
                 "-hseasonal\n" +
                 "#b ($load ($concat +base \"anime/season\"))\n" +
-                "#info ~(seasonal_getstat ($ +b \".seasonal-anime\"))\n" +
-                "#links ~($attr ($ +b \".seasonal-anime .title-text a\") \"href\")\n" +
-                "#titles ~($text ($ +b \".seasonal-anime .title-text\"))\n" +
-                "#images ~($attr ($ +b \".seasonal-anime .image img\") \"src\")\n" +
-                "-[0 +links +titles +images +info null]\n" +
+                "#info *(seasonal_getstat ($ +b \".seasonal-anime\"))\n" +
+                "#links *($attr ($ +b \".seasonal-anime .title-text a\") \"href\")\n" +
+                "#titles *($text ($ +b \".seasonal-anime .title-text\"))\n" +
+                "#images *($attr ($ +b \".seasonal-anime .image img\") \"src\")\n" +
+                "-[0 \"Seasonal Anime\" +links +titles +images +info null]\n" +
                 "\n" +
                 "-seasonal_getstat\n" +
                 "#eps [($text ([ 0 ($ %0 \".eps\"))) null]\n" +

@@ -177,7 +177,7 @@ public class SlangFile {
             case '(':
                 sr.increment();
                 return interpretCall(context, sr);
-            case '~':
+            case '*':
                 //lambda
                 sr.increment();
                 return interpretLambda(context,sr);
