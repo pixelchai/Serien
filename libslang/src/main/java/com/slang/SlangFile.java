@@ -227,8 +227,7 @@ public class SlangFile {
                 throw new SlangException(filename,posFromIndex(sr.getAbsIndex()),"Unknown symbol",null);
         }
     }
-
-    private Object interpretCall(SlangContext context, SlangReader sr) throws Exception {
+    private Tuple<Boolean,String> readMethodName(SlangContext context, SlangReader sr) throws SlangException {
         boolean isEnv = false;
         if(sr.peek()=='$'){
             isEnv=true;
@@ -260,6 +259,14 @@ public class SlangFile {
                 break;
         }
 
+        return new Tuple<Boolean,String>(isEnv,name);
+    }
+
+    private Object interpretCall(SlangContext context, SlangReader sr) throws Exception {
+        Tuple<Boolean,String> mname = readMethodName(context,sr);
+        boolean isEnv = mname.x;
+        String name = mname.y;
+
         List<Object> args = new ArrayList<Object>();
         while(sr.peek()!=')'){
             sr.skipWhitespaceLinear();
@@ -278,33 +285,10 @@ public class SlangFile {
         //expect open bracket
         if(sr.read()!='(')throw new SlangException(filename,posFromIndex(sr.getAbsIndex()),"Expected '('",null);
 
-        boolean isEnv = false;
-        if(sr.peek()=='$'){
-            isEnv=true;
-            sr.increment();
-        }
+        Tuple<Boolean,String> mname = readMethodName(context,sr);
+        boolean isEnv = mname.x;
+        String name = mname.y;
 
-        String name = "";
-        char c = sr.peek();
-        switch (c){
-            case ' ':
-                //short form for sel
-                if(isEnv) {
-                    name = "sel";
-                    sr.increment();
-                }else{
-                    throw new SlangException(filename,posFromIndex(sr.getAbsIndex()),"Expected method name",null);
-                }
-                break;
-            case '[':
-                //indexer
-                name = "getat";
-                sr.increment();
-                break;
-            default:
-                name=sr.readWord();
-                break;
-        }
         sr.skipWhitespace();
         List l = (List)this.interpretExpression(context,sr);
 
