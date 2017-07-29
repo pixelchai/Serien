@@ -40,7 +40,8 @@ public class SlangFile {
         String name = null;
 
         for(int i = 0; i < raw.length(); i++){
-            if(raw.charAt(i)==';'){
+            char cur = raw.charAt(i);
+            if(cur==';'){
                 for(i=i;i<raw.length();i++){
                     char c = raw.charAt(i);
                     if(open) {
@@ -51,8 +52,8 @@ public class SlangFile {
                     }
                 }
             }
-            else if(raw.charAt(i)=='\"'){
-                buf.raw+=raw.charAt(i);
+            else if(cur=='\"'){
+                buf.raw+=cur;
                 i+=1;
                 //skip to end of quote
                 for(i=i;i<raw.length();i++){
@@ -66,7 +67,7 @@ public class SlangFile {
                     }
                 }
             }
-            else if(raw.charAt(i)=='-'){
+            else if(cur=='-'){
                 if(!open){
                     open = true;
                     name = "";
@@ -81,14 +82,15 @@ public class SlangFile {
                     finnext=true;
                 }
             }
-            else if((raw.charAt(i)=='\n'||i==raw.length()-1)&&finnext){
-                finnext=false;
+            else if((cur=='\n'||i==raw.length()-1)&&finnext){
+                if(i==raw.length()-1)buf.raw+=cur;
                 //fin
+                finnext=false;
                 methods.put(buf.name,buf);
                 buf = new SlangMethod();
                 buf.raw = "";
             }
-            else if(raw.charAt(i)=='\n'){
+            else if(cur=='\n'){
                 if(name != null) {
                     buf.name = name.trim();
                     name = null;
@@ -98,9 +100,9 @@ public class SlangFile {
                 }
             }
             else if(name != null){
-                name += raw.charAt(i);
+                name += cur;
             }else{
-                buf.raw+=raw.charAt(i);
+                buf.raw+=cur;
             }
         }
     }
@@ -202,6 +204,9 @@ public class SlangFile {
             case '"':
                 //string literal
                 return sr.readString();
+            case Utils.NULL_CHAR:
+                //unexpected EOF
+                throw new SlangException(filename,posFromIndex(sr.getAbsIndex()),"Unexpected EOF",null);
             default:
                 String w = sr.readWord();
                 if(w.equals("null"))return null;//null
