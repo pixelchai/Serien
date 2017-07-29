@@ -27,8 +27,8 @@ public class Slang {
                 "-[0 +links +titles +images +info null]\n" +
                 "\n" +
                 "-seasonal_getstat\n" +
-                "#eps [($text ([ ($ %0 \".eps\"))) null]\n" +
-                "#score [($trim ($text ([ ($ %0 \".score\")))) \"stars\"]\n" +
+                "#eps [($text ([ 0 ($ %0 \".eps\"))) null]\n" +
+                "#score [($trim ($text ([ 0 ($ %0 \".score\")))) \"stars\"]\n" +
                 "- [+eps +score]";
         try {
             com.slang.SourceSlangFile f = new com.slang.SourceSlangFile(null, file);

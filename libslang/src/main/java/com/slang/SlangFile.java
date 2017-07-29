@@ -211,7 +211,7 @@ public class SlangFile {
                     v = Long.parseLong(w);
                     if ((v >= Utils.MIN_INT && v <= Utils.MAX_INT))
                     {
-                        return v;
+                        return (int)v;
                     }
                 }catch (Exception e){}
                 //double
@@ -243,6 +243,10 @@ public class SlangFile {
                 break;
             case '[':
                 //indexer
+                if(isEnv){
+                    throw new SlangException(filename,posFromIndex(sr.getAbsIndex()),"Unexpected symbol '[' - when doing an indexer call, you don't need the $ before the [",null);
+                }
+                isEnv = true;
                 name = "getat";
                 sr.increment();
                 break;

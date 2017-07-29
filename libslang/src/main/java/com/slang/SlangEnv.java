@@ -63,7 +63,7 @@ public class SlangEnv {
         });
         methodDict.put("getat",new EnvMethod() {
             @Override public Object run(Object... args) throws Exception {
-                return ((List)args[1]).get((int)args[0]);
+                return ((AbstractList)args[1]).get((int)args[0]);
             }
         });
 //        methodDict.put("each",new EnvMethod() {

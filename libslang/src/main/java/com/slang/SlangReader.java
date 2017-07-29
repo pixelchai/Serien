@@ -82,22 +82,22 @@ public class SlangReader {
         }
         return sb.toString();
     }
-    public long readInt() throws SlangException {
-        String w = readWord();
-        if (w.equals("null")) return Utils.NULL_INT;
-        long v = Long.parseLong(w);
-        if (!(v >= Utils.MIN_INT && v <= Utils.MAX_INT))
-        {
-            throw new SlangException(this.getAbsIndex(),"Int out of bounds: " + v);
-        }
-        return v;
-    }
-    public double readDouble()
-    {
-        String w = readWord();
-        if (w.equals("null")) return Utils.NULL_DOUBLE;
-        return Double.parseDouble(w);
-    }
+//    public long readInt() throws SlangException {
+//        String w = readWord();
+//        if (w.equals("null")) return Utils.NULL_INT;
+//        long v = Long.parseLong(w);
+//        if (!(v >= Utils.MIN_INT && v <= Utils.MAX_INT))
+//        {
+//            throw new SlangException(this.getAbsIndex(),"Int out of bounds: " + v);
+//        }
+//        return v;
+//    }
+//    public double readDouble()
+//    {
+//        String w = readWord();
+//        if (w.equals("null")) return Utils.NULL_DOUBLE;
+//        return Double.parseDouble(w);
+//    }
     public String readString() throws SlangException {
         skipWhitespace();
         char c = this.read();
