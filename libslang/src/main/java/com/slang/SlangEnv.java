@@ -129,19 +129,18 @@ public class SlangEnv {
         });
         methodDict.put("concat",new EnvMethod() {
             @Override public Object run(Object... args) throws Exception {
-                try {
-                    //string concatenation
-                    String ret = "";
-                    for (Object str : args) {
-                        ret += String.valueOf(str);
-                    }
-                    return ret;
-                }catch(ClassCastException ex)
-                {
+                try{
                     //array concatenation
                     ArrayList<Object> ret = new ArrayList<Object>();
                     for(Object arg:args){
                         ret.addAll((ArrayList<Object>)arg);
+                    }
+                    return ret;
+                }catch (ClassCastException ex){
+                    //string concatenation
+                    String ret = "";
+                    for (Object str : args) {
+                        ret += String.valueOf(str);
                     }
                     return ret;
                 }
