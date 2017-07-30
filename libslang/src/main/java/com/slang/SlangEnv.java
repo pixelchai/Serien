@@ -24,7 +24,48 @@ public class SlangEnv {
     public static Map<String, EnvMethod> methodDict = new HashMap<String, EnvMethod>();
 
     static{
-        //TODO arithmetic
+        //TODO more arithmetic
+        methodDict.put("mult",new EnvMethod() {
+            @Override public Object run(Object... args) throws IOException {
+                return ((Number)args[0]).doubleValue()*((Number)args[1]).doubleValue();
+            }
+        });
+        methodDict.put("div",new EnvMethod() {
+            @Override public Object run(Object... args) throws IOException {
+                return ((Number)args[0]).doubleValue()/((Number)args[1]).doubleValue();
+            }
+        });
+        methodDict.put("add",new EnvMethod() {
+            @Override public Object run(Object... args) throws IOException {
+                return ((Number)args[0]).doubleValue()+((Number)args[1]).doubleValue();
+            }
+        });
+        methodDict.put("sub",new EnvMethod() {
+            @Override public Object run(Object... args) throws IOException {
+                return ((Number)args[0]).doubleValue()-((Number)args[1]).doubleValue();
+            }
+        });
+        methodDict.put("idiv",new EnvMethod() {
+            @Override public Object run(Object... args) throws IOException {
+                return (((Number)args[0]).intValue())/(((Number)args[1]).intValue());
+            }
+        });
+        methodDict.put("imult",new EnvMethod() {
+            @Override public Object run(Object... args) throws IOException {
+                return (((Number)args[0]).intValue())*(((Number)args[1]).intValue());
+            }
+        });
+        methodDict.put("iadd",new EnvMethod() {
+            @Override public Object run(Object... args) throws IOException {
+                return (((Number)args[0]).intValue())+(((Number)args[1]).intValue());
+            }
+        });
+        methodDict.put("isub",new EnvMethod() {
+            @Override public Object run(Object... args) throws IOException {
+                return (((Number)args[0]).intValue())-(((Number)args[1]).intValue());
+            }
+        });
+
         methodDict.put("load",new EnvMethod() {
             @Override public Object run(Object... args) throws IOException {
                 return Jsoup.connect((String)args[0]).timeout(20000).get();
@@ -92,7 +133,7 @@ public class SlangEnv {
                     //string concatenation
                     String ret = "";
                     for (Object str : args) {
-                        ret += (String) str;
+                        ret += String.valueOf(str);
                     }
                     return ret;
                 }catch(ClassCastException ex)

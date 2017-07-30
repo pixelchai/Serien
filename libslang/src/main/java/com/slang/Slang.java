@@ -53,16 +53,15 @@ public class Slang {
                 "-[+eps +score]\n" +
                 "\n" +
                 "-htop\n" +
-                "\t#b ($load($concat +base \"/topanime.php?limit=0\")) ;TODO pagination\n" +
+                "\t#b ($load($concat +base ($concat \"/topanime.php?limit=\" ($imult %0 50)))) ;TODO pagination\n" +
                 "\n" +
                 "\t#links *($attr ($ +b \".ranking-list .title .clearfix .hoverinfo_trigger\") \"href\")\n" +
                 "\t#titles *($text ($ +b \".ranking-list .title .clearfix\"))\n" +
                 "\n" +
                 "\t#imgelems ($ +b \".ranking-list img\")\n" +
-                "\t#images *([($concat \n" +
+                "\t#images *([\n" +
                 "\t\t\t\t($trim *(~ *($attr +imgelems \"data-srcset\") +rgx))\n" +
-                "\t\t\t\t($trim *(~ *($attr +imgelems \"srcset\") +rgx))\n" +
-                "\t\t\t)+highres)\n" +
+                "\t\t\t+highres)\n" +
                 "\t#info *(top_getstat($ +b \".ranking-list\"))\n" +
                 "-[3 \"Top Anime\" +links +titles +images +info \"htop\"]";
         try {
@@ -74,7 +73,7 @@ public class Slang {
 
             f.init();
             //TODO DO THIS: java.net.URLEncoder.encode("Hello World", "UTF-8"));
-            ArrayList<Object> l = (ArrayList<Object>)f.interpretMethod("htop");
+            ArrayList<Object> l = (ArrayList<Object>)f.interpretMethod("htop",0);
             System.out.println(l);
         }catch (Exception e){
             System.err.println(e.getMessage());
