@@ -186,8 +186,9 @@ public class SlangFile {
                 List<Object> l = new ArrayList<Object>();
                 sr.increment();
                 while(sr.peek()!=']'){
-                    sr.skipWhitespaceLinear();
+                    sr.skipWhitespace();
                     l.add(this.interpretExpression(context,sr));
+                    sr.skipWhitespace();
                 }
                 //expect close bracket
                 if(sr.read()!=']')throw new SlangException(filename,posFromIndex(sr.getAbsIndex()),"Expected ']'",null);
@@ -282,8 +283,9 @@ public class SlangFile {
 
         List<Object> args = new ArrayList<Object>();
         while(sr.peek()!=')'){
-            sr.skipWhitespaceLinear();
+            sr.skipWhitespace();
             args.add(this.interpretExpression(context,sr));
+            sr.skipWhitespace();
         }
         //expect close bracket
         if(sr.read()!=')')throw new SlangException(filename,posFromIndex(sr.getAbsIndex()),"Expected ')'",null);
@@ -307,9 +309,10 @@ public class SlangFile {
 
         List<Object> args = new ArrayList<Object>();
         while(sr.peek()!=')'){
-            sr.skipWhitespaceLinear();
+            sr.skipWhitespace();
             if(sr.peek()==')')break;
             args.add(this.interpretExpression(context,sr));
+            sr.skipWhitespace();
         }
         //expect closed bracket
         if(sr.read()!=')')throw new SlangException(filename,posFromIndex(sr.getAbsIndex()),"Expected ')'",null);

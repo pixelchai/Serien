@@ -16,23 +16,31 @@ public class Slang {
                 "@highres 1\n" +
                 "-\n" +
                 "\n" +
-                "-home\n" +
-                "-[\"hseasonal\"]\n" +
+                "-home-[\"hseasonal\"]\n" +
                 "\n" +
                 "-hseasonal\n" +
-                "#b ($load ($concat +base \"anime/season\"))\n" +
-                "#info *(seasonal_getstat ($ +b \".seasonal-anime\"))\n" +
-                "#links *($attr ($ +b \".seasonal-anime .title-text a\") \"href\")\n" +
-                "#titles *($text ($ +b \".seasonal-anime .title-text\"))\n" +
-                "#imgelems ($ +b \".seasonal-anime .image img\")\n" +
-                "#imgl1 ($trim *(~ *($attr +imgelems \"data-srcset\") \"(https?|ftp):\\\\/\\\\/[^\\\\s/$.?#].[^\\\\s]*\"))\n" +
-                "#imgl2 ($trim *(~ *($attr +imgelems \"srcset\") \"(https?|ftp):\\\\/\\\\/[^\\\\s/$.?#].[^\\\\s]*\"))\n" +
-                "#images *([ ($concat +imgl1 +imgl2) +highres)\n" +
+                "\t#rgx \"(https?|ftp):\\\\/\\\\/[^\\\\s/$.?#].[^\\\\s]*\"\n" +
+                "\t#elm \".seasonal-anime\"\n" +
+                "\t#b ($load($concat +base \"anime/season\"))\n" +
+                "\n" +
+                "\t#info *(seasonal_getstat($ +b +elm))\n" +
+                "\t#links *($attr ($ +b($concat +elm \" .title-text a\")) \"href\")\n" +
+                "\t#titles *($text ($ +b($concat +elm \" .title-text\")))\n" +
+                "\n" +
+                "\t#imgelems ($ +b($concat +elm \" .image img\"))\n" +
+                "\t#images *([($concat \n" +
+                "\t\t\t($trim *(~ *($attr +imgelems \"data-srcset\") +rgx))\n" +
+                "\t\t\t($trim *(~ *($attr +imgelems \"srcset\") +rgx))\n" +
+                "\t\t\t)+highres)\n" +
                 "-[0 \"Seasonal Anime\" +links +titles +images +info null]\n" +
                 "\n" +
                 "-seasonal_getstat\n" +
-                "#eps [($text ([ ($ %0 \".eps\") 0)) null]\n" +
-                "#score [($trim ($text ([ ($ %0 \".score\") 0))) \"stars\"]\n" +
+                "\t#eps [($text \n" +
+                "\t\t([ ($ %0 \".eps\") 0)\n" +
+                "\t\t) null]\n" +
+                "\t#score [($trim ($text \n" +
+                "\t\t([ ($ %0 \".score\") 0)\n" +
+                "\t\t)) \"stars\"]\n" +
                 "- [+eps +score]";
         try {
             com.slang.SourceSlangFile f = new com.slang.SourceSlangFile(null, file);
