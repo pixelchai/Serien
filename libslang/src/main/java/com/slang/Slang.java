@@ -13,6 +13,7 @@ public class Slang {
                 "@by \"syanochara\"\n" +
                 "@type 1\n" +
                 "@base \"https://myanimelist.net/\"\n" +
+                "@highres 1\n" +
                 "-\n" +
                 "\n" +
                 "-home\n" +
@@ -23,12 +24,15 @@ public class Slang {
                 "#info *(seasonal_getstat ($ +b \".seasonal-anime\"))\n" +
                 "#links *($attr ($ +b \".seasonal-anime .title-text a\") \"href\")\n" +
                 "#titles *($text ($ +b \".seasonal-anime .title-text\"))\n" +
-                "#images *($attr ($ +b \".seasonal-anime .image img\") \"src\")\n" +
+                "#imgelems ($ +b \".seasonal-anime .image img\")\n" +
+                "#imgl1 ($trim *(~ *($attr +imgelems \"data-srcset\") \"(https?|ftp):\\\\/\\\\/[^\\\\s/$.?#].[^\\\\s]*\"))\n" +
+                "#imgl2 ($trim *(~ *($attr +imgelems \"srcset\") \"(https?|ftp):\\\\/\\\\/[^\\\\s/$.?#].[^\\\\s]*\"))\n" +
+                "#images *([ ($concat +imgl1 +imgl2) +highres)\n" +
                 "-[0 \"Seasonal Anime\" +links +titles +images +info null]\n" +
                 "\n" +
                 "-seasonal_getstat\n" +
-                "#eps [($text ([ 0 ($ %0 \".eps\"))) null]\n" +
-                "#score [($trim ($text ([ 0 ($ %0 \".score\")))) \"stars\"]\n" +
+                "#eps [($text ([ ($ %0 \".eps\") 0)) null]\n" +
+                "#score [($trim ($text ([ ($ %0 \".score\") 0))) \"stars\"]\n" +
                 "- [+eps +score]";
         try {
             com.slang.SourceSlangFile f = new com.slang.SourceSlangFile(null, file);

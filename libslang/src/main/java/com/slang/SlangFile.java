@@ -246,13 +246,26 @@ public class SlangFile {
                 }
                 break;
             case '[':
-                //indexer
+            case '~':
                 if(isEnv){
-                    throw new SlangException(filename,posFromIndex(sr.getAbsIndex()),"Unexpected symbol '[' - when doing an indexer call, you don't need the $ before the [",null);
+                    throw new SlangException(filename,posFromIndex(sr.getAbsIndex()),"Unexpected symbol '"+c+"' - the $ is probably not necessary",null);
                 }
                 isEnv = true;
-                name = "getat";
-                sr.increment();
+                switch (c) {
+                    case '[':
+                        //indexer
+                        name = "getat";
+                        sr.increment();
+                        break;
+                    case '~':
+                        //regex stuff
+                        name="regex";
+                        sr.increment();
+                        if(sr.isWordChar(sr.peek())) {
+                            name += sr.read();
+                        }
+                        break;
+                }
                 break;
             default:
                 name=sr.readWord();

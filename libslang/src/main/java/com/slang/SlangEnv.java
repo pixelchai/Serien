@@ -6,6 +6,8 @@ import org.jsoup.select.*;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -44,16 +46,58 @@ public class SlangEnv {
         });
         methodDict.put("trim",new EnvMethod() {
             @Override public Object run(Object... args) throws Exception {
-                return ((String)args[0]).trim();
+                try {
+                    //string trim
+                    return ((String) args[0]).trim();
+                }catch (ClassCastException e){
+                    //trim array list of "empty" items
+                    ArrayList<Object> l =((ArrayList<Object>)args[0]);
+                    ArrayList<Object> ret = new ArrayList<Object>();
+                    //trim start
+                    boolean done=false;
+                    for(int i = 0; i<l.size();i++){
+                        Object o = l.get(i);
+                        if(!done) {
+                            if (!isEmpty(o)) {
+                                done=true;
+                                ret.add(o);
+                            }
+                            //else ignore
+                        }else{
+                            ret.add(o);
+                        }
+                    }
+                    //trim end
+                    for (int i = ret.size() - 1; i >= 0; i--)
+                    {
+                        if(isEmpty(ret.get(i))){
+                            ret.remove(i);
+                        }else{
+                            break;
+                        }
+                    }
+                    return ret;
+                }
             }
         });
         methodDict.put("concat",new EnvMethod() {
             @Override public Object run(Object... args) throws Exception {
-                String ret = "";
-                for(Object str : args){
-                    ret+=(String)str;
+                try {
+                    //string concatenation
+                    String ret = "";
+                    for (Object str : args) {
+                        ret += (String) str;
+                    }
+                    return ret;
+                }catch(ClassCastException ex)
+                {
+                    //array concatenation
+                    ArrayList<Object> ret = new ArrayList<Object>();
+                    for(Object arg:args){
+                        ret.addAll((ArrayList<Object>)arg);
+                    }
+                    return ret;
                 }
-                return ret;
             }
         });
         methodDict.put("precat",new EnvMethod() {
@@ -63,9 +107,21 @@ public class SlangEnv {
         });
         methodDict.put("getat",new EnvMethod() {
             @Override public Object run(Object... args) throws Exception {
-                return ((AbstractList)args[1]).get((int)args[0]);
+                return ((AbstractList)args[0]).get((int)args[1]);
             }
         });
+        methodDict.put("regex",new EnvMethod() {
+            @Override public Object run(Object... args) throws Exception {
+                List<String> allMatches = new ArrayList<String>();
+                Matcher m = Pattern.compile((String)args[1])
+                        .matcher((String)args[0]);
+                while (m.find()) {
+                    allMatches.add(m.group());
+                }
+                return allMatches;
+            }
+        });
+        //TODO more regex stuff
 //        methodDict.put("each",new EnvMethod() {
 //            @Override public Object run(Object... args) throws Exception {
 //                List l = (List)args[0];
@@ -76,5 +132,18 @@ public class SlangEnv {
 //                return ret;
 //            }
 //        });
+    }
+
+    private static boolean isEmpty(Object o){
+        //TODO more types
+        boolean isempty = false;
+        try {
+            isempty = ((AbstractList)o).size()<=0;
+        }catch (ClassCastException ex)
+        {
+            isempty=((int)o)==0;
+            //let it throw ClassCastException if needed
+        }
+        return isempty;
     }
 }
