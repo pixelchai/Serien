@@ -39,6 +39,11 @@ public class SlangEnv {
                 return ((Element)args[0]).text();
             }
         });
+        methodDict.put("html",new EnvMethod() {
+            @Override public Object run(Object... args) throws Exception {
+                return ((Element)args[0]).html();
+            }
+        });
         methodDict.put("attr",new EnvMethod() {
             @Override public Object run(Object... args) throws Exception {
                 return ((Element)args[0]).attr((String)args[1]);
