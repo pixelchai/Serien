@@ -5,6 +5,8 @@ package com.slang;
  */
 
 public class Utils {
+    public static final boolean DEBUG_READER = false;
+
     public static final char NULL_CHAR = Character.MAX_VALUE;
     public static final long NULL_INT = Long.MAX_VALUE;
 //    public static long NULL_UINT = Long.MAX_VALUE;

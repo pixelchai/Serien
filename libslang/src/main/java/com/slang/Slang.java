@@ -7,9 +7,9 @@ import java.util.*;
  */
 
 public class Slang {
-    public static void main(final String[] args){
+    public static SourceSlangFile getSl(){
         String file = "-init\n" +
-                "@title \"MyAnimeList\"\n" +
+                "@name \"MyAnimeList\"\n" +
                 "@by \"syanochara\"\n" +
                 "@type 1\n" +
                 "@base \"https://myanimelist.net/\"\n" +
@@ -73,11 +73,13 @@ public class Slang {
 
             f.init();
             //TODO DO THIS: java.net.URLEncoder.encode("Hello World", "UTF-8"));
-            ArrayList<Object> l = (ArrayList<Object>)f.interpretMethod("htop",0);
-            System.out.println(l);
+            return f;
         }catch (Exception e){
             System.err.println(e.getMessage());
             e.printStackTrace();
+            return null;
         }
+    }
+    public static void main(final String[] args){
     }
 }

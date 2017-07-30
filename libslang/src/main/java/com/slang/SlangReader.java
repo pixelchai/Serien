@@ -44,7 +44,7 @@ public class SlangReader {
         return increment(1);
     }
     public int increment(int x) {
-        System.out.println(this.getAbsIndex()+": "+look(0));
+        if(Utils.DEBUG_READER)System.out.println(this.getAbsIndex()+": "+look(0));
         index+=x;
         return index;
     }

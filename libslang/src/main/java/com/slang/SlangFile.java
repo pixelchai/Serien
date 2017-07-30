@@ -110,6 +110,9 @@ public class SlangFile {
     public void init() throws Exception {
         this.interpretMethod("init");
     }
+    public String getName() throws Exception {
+        return (String)globalContext.getVariable("name");
+    }
     public Object interpretMethod(String name, Object... args) throws Exception {
         SlangMethod method = methods.get(name);
         if(method == null){
