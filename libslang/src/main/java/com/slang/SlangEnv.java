@@ -24,6 +24,7 @@ public class SlangEnv {
     public static Map<String, EnvMethod> methodDict = new HashMap<String, EnvMethod>();
 
     static{
+        //TODO arithmetic
         methodDict.put("load",new EnvMethod() {
             @Override public Object run(Object... args) throws IOException {
                 return Jsoup.connect((String)args[0]).timeout(20000).get();
