@@ -29,10 +29,10 @@
 
 	images = @*a:($trim(@(*x:
 	                    @(*y:imgelems)$attr(y, "data-srcset")
-	                 )~(x,rgx))
+	                 )(x~rgx))
 	         +$trim(@(*x:
                    	    @(*y:imgelems)$attr(y, "srcset")
-                   	 )~(x,rgx)))a[0]
+                   	 )(x~rgx)))a[0]
 
     images = @(x: $(b, elm+" .image img"))
                 ?(x.$hasattr("data-srcset"))x.$attr("data-srcset")~rgx
