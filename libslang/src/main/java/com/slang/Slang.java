@@ -9,7 +9,9 @@ import java.util.*;
 
 public class Slang {
     public static SourceSlangFile getSl(){
-        File file = new File(new File("").getAbsolutePath().concat("\\concept\\slang\\serienMAL2.sl"));
+        File file;
+		if(true)file = new File("/storage/sdcard0/AppProjects/Serien/concept/slang/serienMAL2.sl");
+		
         StringBuilder sb = new StringBuilder();
         try {
             Scanner in = new Scanner(new FileReader(file));
