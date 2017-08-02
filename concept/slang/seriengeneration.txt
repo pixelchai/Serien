@@ -1,0 +1,35 @@
+
+
+//---------------------------------------------------------------------
+//app store style - kissanime latest update
+[constant int 0,
+ optional string title,
+ string[] links,
+ string[] titles,
+ string[] images,
+ optional string[][][] info,
+ optional string methodname]
+
+//image bar (slideshow) across screen - animeheaven
+[constant int 1,
+ optional string title,
+ string[] links,
+ string[] images,
+ optional string[] titles] 
+
+//2xn grid image blocks - animeheaven home
+[constant int 2,
+ optional string title,
+ string[] links,
+ string[] images,
+ optional string[] titles,
+ optional string methodname] 
+
+//list w/img - mal top anime
+[constant int 3,
+ optional string title,
+ string[] links,
+ string[] titles,
+ string[] images,
+ optional string[][][] info,
+ optional string methodname]
