@@ -42,6 +42,13 @@ public class SlangFile {
     private void throwExec(SlangReader sr, Character symbol) throws SlangException{
         throwExec(sr,"Unexpected character '"+symbol+"'");
     }
+    private void throwExec(String message,Exception inner) throws SlangException{
+        throw new SlangException(filename,null,message,inner);
+
+    }
+    private void throwExec(String message) throws SlangException{
+        throwExec(message,null);
+    }
 
     private void parseMethods() throws Exception {
         SlangReader sr = new SlangReader(this.raw);
@@ -132,57 +139,82 @@ public class SlangFile {
     public String getName() throws Exception {
         return (String)globalContext.getVariable("name");
     }
-    public Object interpretMethod(String name, Object... args) throws Exception {
-        SlangMethod method = methods.get(name);
-        if(method == null){
-            throw new SlangException(filename,null,"Could not find method \""+name+"\"",null);
-        }
-        //load method
-            SlangReader sr = new SlangReader(method.raw, method.baseIndex);
-        try {
-            SlangContext context = new SlangContext(globalContext);
-            for (int i = 0; i < args.length; i++) {
-                context.params.put(Integer.toString(i), args[i]);
-            }
-            while (true) {
-                sr.skipWhitespace();
-                char c = sr.peek();
-                switch (c) {
-                    case ';':
-                        //comment
-                        sr.increment();
-                        while (sr.read() != '\n') {
-                        } //skip to \n
-                        break;
-                    case '-':
-                        //return statement
-                        sr.increment();
-                        sr.skipWhitespaceLinear();
-                        char a = sr.peek();
-                        if (a == '\n' || a == Utils.NULL_CHAR) {
-                            return null;
-                        } else {
-                            //not void
-                            return this.interpretExpression(context, sr);
-                        }
-                    default:
-                        //method call
-//                    sr.increment();
-//                    interpretCall(context,sr);
-                        this.interpretExpression(context, sr);
-//                    break;
-//                case '~':
-//                    sr.increment();
-                        //lambda
-//                    this.interpretExpression(context,sr);
-                        break;
-                }
-            }
-        }catch (Exception e){
-            throw new SlangException(filename,posFromIndex(sr.getAbsIndex()),null,e);
-        }
+
+    public Object interpretMethod(SlangMethod body){
+        SlangReader sr = body.getReader();
+
+        return null;//TODO
     }
-    private Object interpretExpression(SlangContext context, SlangReader sr) throws Exception {
+
+    public Object interpretMethod(String name, Object... args) throws SlangException {
+        SlangMethod method = methods.get(name);
+
+        if(method == null){
+            throwExec("Could not find method \""+name+"\"");
+        }
+
+        method.context = new SlangContext(globalContext);
+        for (int i = 0; i < args.length; i++) {
+            method.context.params.put(Integer.toString(i), args[i]);
+        }
+
+        return interpretMethod(method);
+    }
+
+//    public Object interpretMethod(String name, Object... args) throws Exception {
+//        SlangMethod method = methods.get(name);
+//        if(method == null){
+//            throw new SlangException(filename,null,"Could not find method \""+name+"\"",null);
+//        }
+//        //load method
+//            SlangReader sr = new SlangReader(method.raw, method.baseIndex);
+//        try {
+//            SlangContext context = new SlangContext(globalContext);
+//            for (int i = 0; i < args.length; i++) {
+//                context.params.put(Integer.toString(i), args[i]);
+//            }
+//            while (true) {
+//                sr.skipWhitespace();
+//                char c = sr.peek();
+//                switch (c) {
+//                    case ';':
+//                        //comment
+//                        sr.increment();
+//                        while (sr.read() != '\n') {
+//                        } //skip to \n
+//                        break;
+//                    case '-':
+//                        //return statement
+//                        sr.increment();
+//                        sr.skipWhitespaceLinear();
+//                        char a = sr.peek();
+//                        if (a == '\n' || a == Utils.NULL_CHAR) {
+//                            return null;
+//                        } else {
+//                            //not void
+//                            return this.interpretExpr(context, sr);
+//                        }
+//                    default:
+//                        //method call
+////                    sr.increment();
+////                    interpretCall(context,sr);
+//                        this.interpretExpr(context, sr);
+////                    break;
+////                case '~':
+////                    sr.increment();
+//                        //lambda
+////                    this.interpretExpr(context,sr);
+//                        break;
+//                }
+//            }
+//        }catch (Exception e){
+//            throw new SlangException(filename,posFromIndex(sr.getAbsIndex()),null,e);
+//        }
+//    }
+    private Object interpretExpr(SlangCode expr) throws Exception {
+        return interpretExpr(expr.context, expr.getReader());
+    }
+    private Object interpretExpr(SlangContext context, SlangReader sr) throws Exception {
         sr.skipWhitespace();
         char c = sr.peek();
         switch (c) {
@@ -199,7 +231,7 @@ public class SlangFile {
                 sr.increment();
                 while(sr.peek()!=']'){
                     sr.skipWhitespace();
-                    l.add(this.interpretExpression(context,sr));
+                    l.add(this.interpretExpr(context,sr));
                     sr.skipWhitespace();
                 }
                 //expect close bracket
@@ -296,7 +328,7 @@ public class SlangFile {
         List<Object> args = new ArrayList<Object>();
         while(sr.peek()!=')'){
             sr.skipWhitespace();
-            args.add(this.interpretExpression(context,sr));
+            args.add(this.interpretExpr(context,sr));
             sr.skipWhitespace();
         }
         //expect close bracket
@@ -317,13 +349,13 @@ public class SlangFile {
         String name = mname.y;
 
         sr.skipWhitespace();
-        List l = (List)this.interpretExpression(context,sr);
+        List l = (List)this.interpretExpr(context,sr);
 
         List<Object> args = new ArrayList<Object>();
         while(sr.peek()!=')'){
             sr.skipWhitespace();
             if(sr.peek()==')')break;
-            args.add(this.interpretExpression(context,sr));
+            args.add(this.interpretExpr(context,sr));
             sr.skipWhitespace();
         }
         //expect closed bracket
@@ -345,6 +377,6 @@ public class SlangFile {
         return ret;
     }
     private void interpretVariable(SlangContext context, SlangReader sr) throws Exception {
-        context.variables.put(sr.readWord(), this.interpretExpression(context, sr));
+        context.variables.put(sr.readWord(), this.interpretExpr(context, sr));
     }
 }

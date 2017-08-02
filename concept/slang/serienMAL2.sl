@@ -1,23 +1,20 @@
 --init
-//b
-@name "MyAnimeList"
-@by "syanochara"
-@type 1
-@base "https://myanimelist.net/"
-@highres 1
-@rgx "(https?|ftp):\\/\\/[^\\s/$.?#].[^\\s]*"
+=^name:"MyAnimeList"
+=^by:"syano"
+=^type:1
+=^base:"https://myanimelist.net/"
+=^highres:1
+=^rgx:"(https?|ftp):\\/\\/[^\\s/$.?#].[^\\s]*"
 ----
 
---home--["hseasonal" "htop"]--
+--home--["hseasonal", "htop"]--
 
 --seasonal_getstat
-	#eps [($text 
-			([ ($ %0 ".eps") 0)
-			) null]
-	#score [($trim ($text 
-			([ ($ %0 ".score") 0)
-			)) "stars"]
---[+eps +score]--
+	=eps:[$text(
+	    $(%0, ".eps")[0]), null]
+	=score:[$trim(
+	    $text($(%0, ".score")[0])), "stars"]
+--[eps, score]--
 
 --hseasonal
 	#elm ".seasonal-anime"
