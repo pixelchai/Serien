@@ -68,6 +68,46 @@ public class SlangReader {
             else return;
         }
     }
+
+    public boolean isNext(String str){
+        StringBuilder acc = new StringBuilder();
+        for(int i = 0; i < str.length() && i < raw.length(); i++){
+            acc.append(look(i));
+        }
+        return acc.toString().equals(str);
+    }
+
+    /**
+     * reads until c found or EOF. Includes.
+     */
+    public String readUntil(char c){
+        StringBuilder sb = new StringBuilder();
+        while(true){
+            if(this.peek()==c){
+                sb.append(c);
+                this.increment();
+                return sb.toString();
+            }
+            if(this.peek()==Utils.NULL_CHAR)return sb.toString();
+            sb.append(read());
+        }
+    }
+    /**
+     * reads until str found or EOF. Includes.
+     */
+    public String readUntil(String str){
+        StringBuilder sb = new StringBuilder();
+        while(true){
+            if(this.peek()==Utils.NULL_CHAR)return sb.toString();
+            if(this.isNext(str)) {
+                sb.append(str);
+                this.increment(str.length());
+                return sb.toString();
+            }
+            sb.append(read());
+        }
+    }
+
     public boolean isWordChar(char c){
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' /*|| c == '-' *|| c == '+' || c == '.'*/;
     }

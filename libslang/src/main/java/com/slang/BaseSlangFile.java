@@ -5,7 +5,7 @@ package com.slang;
  */
 
 public class BaseSlangFile extends SlangFile {
-    public BaseSlangFile(String filename, String raw) {
+    public BaseSlangFile(String filename, String raw) throws Exception {
         super(filename,raw);
     }
 }

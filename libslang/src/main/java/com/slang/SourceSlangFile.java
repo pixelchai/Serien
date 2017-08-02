@@ -8,7 +8,7 @@ import java.util.List;
  */
 
 public class SourceSlangFile extends SlangFile {
-    public SourceSlangFile(String filename, String raw) {
+    public SourceSlangFile(String filename, String raw) throws Exception {
         super(filename, raw);
     }
 

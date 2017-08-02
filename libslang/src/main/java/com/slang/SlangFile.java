@@ -23,7 +23,7 @@ public class SlangFile {
 
     public SlangContext globalContext = new SlangContext();
 
-    public SlangFile(String filename, String raw){
+    public SlangFile(String filename, String raw) throws Exception {
         this.raw = raw/*.replace('\u201C','"').replace('\u201D','"')*/;
         this.filename = filename;
         this.parseMethods();
@@ -32,78 +32,97 @@ public class SlangFile {
         String[] l = raw.substring(0,index).split("\n");
         return new Pos(l[l.length-1].length(),l.length);
     }
-    private void parseMethods(){
+
+    private void throwExec(SlangReader sr, String message, Exception inner) throws SlangException {
+        throw new SlangException(filename,posFromIndex(sr.getAbsIndex()),message,inner);
+    }
+    private void throwExec(SlangReader sr, String message) throws SlangException {
+        throwExec(sr,message,null);
+    }
+    private void throwExec(SlangReader sr, Character symbol) throws SlangException{
+        throwExec(sr,"Unexpected character '"+symbol+"'");
+    }
+
+    private void parseMethods() throws Exception {
+        SlangReader sr = new SlangReader(this.raw);
+
         SlangMethod buf = new SlangMethod();
         buf.raw = "";
         boolean open = false;
-        boolean finnext = false;
-        String name = null;
 
-        for(int i = 0; i < raw.length(); i++){
-            char cur = raw.charAt(i);
-            if(cur==';'){
-                for(i=i;i<raw.length();i++){
-                    char c = raw.charAt(i);
-                    if(open) {
-                        buf.raw += c;
+        while(true){
+            if(!open)sr.skipWhitespace();
+
+            char c = sr.peek();
+            if(c==Utils.NULL_CHAR){
+                //ending
+                break;
+            }
+
+            if(!open) {
+                if (!(sr.isNext("--")||sr.isNext("/*")||sr.isNext("//")))throwExec(sr,c);
+            }
+
+            switch (c){
+                case '/':
+                    sr.increment();
+                    if(open){
+                        buf.raw+=c;
+                        buf.raw+= readComment(sr);
+                    }else{
+                        readComment(sr); //skip comment
                     }
-                    if(c=='\n'){
+                    break;
+                case '"':
+                    buf.raw += "\""+sr.readString()+"\"";//read string
+                    break;
+                case '-':
+                    if(sr.isNext("--")) {
+                        sr.increment(2);
+
+                        if(!open){
+                            //opening
+                            buf.name=sr.readWord();
+                            buf.baseIndex = sr.getAbsIndex();
+                            open = true;
+                        }else{
+                            buf.raw+="--";
+                            //closing
+                            buf.raw+=sr.readUntil("--");
+                            methods.put(buf.name,buf);
+
+                            //reset
+                            buf = new SlangMethod();
+                            buf.raw = "";
+                            open = false;
+                        }
                         break;
                     }
-                }
-            }
-            else if(cur=='\"'){
-                buf.raw+=cur;
-                i+=1;
-                //skip to end of quote
-                for(i=i;i<raw.length();i++){
-                    char c = raw.charAt(i);
+                    //else fall through to default
+                default:
                     buf.raw+=c;
-                    if(c=='\\'){
-                        i+=1;
-                        buf.raw+=raw.charAt(i);//if this is a " it will be added and skipped (since it is not the end of string)
-                    }else if(c=='"'){
-                        break;
-                    }
-                }
+                    sr.increment();
+                    break;
             }
-            else if(cur=='-'){
-                if(!open){
-                    open = true;
-                    name = "";
-                }else{
-                    buf.raw+='-';
-                    if(name != null) {
-                        buf.name = name.trim();
-                        name = null;
-                        buf.baseIndex=i;
-                    }
-                    open = false;
-                    finnext=true;
-                }
-            }
-            else if((cur=='\n'||i==raw.length()-1)&&finnext){
-                if(i==raw.length()-1)buf.raw+=cur;
-                //fin
-                finnext=false;
-                methods.put(buf.name,buf);
-                buf = new SlangMethod();
-                buf.raw = "";
-            }
-            else if(cur=='\n'){
-                if(name != null) {
-                    buf.name = name.trim();
-                    name = null;
-                    buf.baseIndex=i;
-                }else{
-                    buf.raw+='\n';
-                }
-            }
-            else if(name != null){
-                name += cur;
-            }else{
-                buf.raw+=cur;
-            }
+        }
+
+    }
+
+    /**
+     * no head
+     */
+    private String readComment(SlangReader sr) throws SlangException {
+        char c2 = sr.peek();
+        if(c2 == '/'){
+            //linear comment, read to \n
+            return sr.readUntil('\n');
+
+        }else if(c2=='*'){
+            //multi comment, read to */ or EOF
+            return sr.readUntil("*/");
+        }else{
+            throwExec(sr,c2);
+            return null;
         }
     }
 
@@ -134,16 +153,6 @@ public class SlangFile {
                         sr.increment();
                         while (sr.read() != '\n') {
                         } //skip to \n
-                        break;
-                    case '@':
-                        //global variable definition
-                        sr.increment();
-                        this.interpretVariable(globalContext, sr);
-                        break;
-                    case '#':
-                        //local variable definition
-                        sr.increment();
-                        this.interpretVariable(context, sr);
                         break;
                     case '-':
                         //return statement
