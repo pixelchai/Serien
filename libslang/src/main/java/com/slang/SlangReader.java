@@ -78,13 +78,13 @@ public class SlangReader {
     }
 
     /**
-     * reads until c found or EOF. Includes.
+     * reads until c found or EOF.
      */
-    public String readUntil(char c){
+    public String readUntil(char c, boolean include){
         StringBuilder sb = new StringBuilder();
         while(true){
             if(this.peek()==c){
-                sb.append(c);
+                if(include)sb.append(c);
                 this.increment();
                 return sb.toString();
             }
@@ -95,12 +95,12 @@ public class SlangReader {
     /**
      * reads until str found or EOF. Includes.
      */
-    public String readUntil(String str){
+    public String readUntil(String str, boolean include){
         StringBuilder sb = new StringBuilder();
         while(true){
             if(this.peek()==Utils.NULL_CHAR)return sb.toString();
             if(this.isNext(str)) {
-                sb.append(str);
+                if(include)sb.append(str);
                 this.increment(str.length());
                 return sb.toString();
             }

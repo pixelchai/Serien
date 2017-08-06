@@ -21,9 +21,9 @@
 	elm = ".seasonal-anime"
 	b=$load($concat(base, "anime/season"))
 
-	links = @(*: $(b, elm+" .title-text a")) $attr "href" //implicit lambda
-	titles = @(*: $(b, elm+" .title-text")) $text //postfix operator
-	info = @(*:b.$elm)seasonal_getstat //var.method("arg2")
+	links = @(*: $(b, elm+" .title-text a"))(*.$attr("href")) //implicit lambda
+	titles = @(*: $(b, elm+" .title-text"))*.$text //postfix operator
+	info = @(*:b.$elm)*.seasonal_getstat //var.method("arg2")
 
 	imgelems = $(b, elm+" .image img")
 
