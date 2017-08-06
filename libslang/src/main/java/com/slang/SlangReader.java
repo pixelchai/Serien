@@ -138,6 +138,10 @@ public class SlangReader {
 //        if (w.equals("null")) return Utils.NULL_DOUBLE;
 //        return Double.parseDouble(w);
 //    }
+
+    /**
+     * does not return "s
+     */
     public String readString() throws SlangException {
         skipWhitespace();
         char c = this.read();

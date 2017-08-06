@@ -195,25 +195,35 @@ public class SlangFile {
             case '(':
                 //bracketed expr
                 sr.increment();
-                int brind = sr.getAbsIndex();
-                String brexpr = sr.readUntil(')',false);
-                return interpretExpr(new SlangCode(context,brexpr,brind));
+                Object expr = this.interpretExpr(context,sr);
+                //expect )
+                if(sr.read()!=')')this.throwExec(sr,')');
+                return expr;
             case '[':
                 //list literal
                 sr.increment();
                 ArrayList<Object> ret = new ArrayList<Object>();
-                //TODO
-                while(true){
-                    if(sr.peek() ==']'){
-                        //end
-                        sr.increment();
-                        break;
-                    }else{
-                        //element
-                        ret.add(this.interpretExpr(context,sr));
-                        //expect comma
+                if(sr.peek()==']'){
+                    sr.increment();
+                    return ret; //empty array
+                }else{
+                    ret.add(this.interpretExpr(context,sr));
+                    while(true){
+                        if(sr.peek()==',')ret.add(this.interpretExpr(context,sr));
+                        else if(sr.peek()==']'){
+                            sr.increment();
+                            return ret;
+                        }
                     }
                 }
+            case '"':
+                //string literal
+                return sr.readString();
+            //TODO
+            default:
+                if(sr.isNext("null"))return null;
+                else if(sr.isNext())
+                break;
         }
 
         return null;
