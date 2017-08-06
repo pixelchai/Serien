@@ -122,6 +122,36 @@ public class SlangReader {
         }
         return sb.toString();
     }
+
+    /**
+     * returns null if fail
+     */
+    public Object readNumber(){
+        skipWhitespace();
+
+        String w = "";
+        if(this.peek()=='-')w+='-';//neg
+
+        StringBuilder sb = new StringBuilder();
+        while(true){
+            char c = this.peek();
+            if((c >= '0' && c <= '9')  || c == '.'){
+              sb.append(c);
+            }
+            else break;
+        }
+        w+=sb.toString();
+
+        try{
+            return Integer.parseInt(w);
+        }catch (NumberFormatException e){
+            try {
+                return Double.parseDouble(w);
+            }catch (NumberFormatException ex){
+                return null;
+            }
+        }
+    }
 //    public long readInt() throws SlangException {
 //        String w = readWord();
 //        if (w.equals("null")) return Utils.NULL_INT;

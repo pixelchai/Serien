@@ -28,12 +28,12 @@ public class SlangContext {
         throw new SlangException("Could not find variable \""+varname+"\"");
     }
 
-    public Object getParam(String param){
+    public Object getParam(String param) throws SlangException {
         SlangContext c = this;
         while(c != null) {
             if(c.params.containsKey(param))return c.params.get(param);
             else c = c.parentContext;
         }
-        return null;
+        throw new SlangException("Could not find param \""+param+"\"");
     }
 }

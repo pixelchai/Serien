@@ -1,5 +1,6 @@
 package com.slang;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -138,7 +139,7 @@ public class SlangFile {
         this.interpretMethod("init");
     }
     public String getName() throws Exception {
-        return (String)globalContext.getVariable("name");
+        return (String)getVar(globalContext,new Ref("name"));
     }
 
     public Object interpretMethod(SlangMethod body) throws Exception {
@@ -188,29 +189,131 @@ public class SlangFile {
     private Object interpretExpr(SlangCode expr) throws Exception {
         return interpretExpr(expr.context, expr.getReader());
     }
-    private Object interpretExpr(SlangContext context, SlangReader sr) throws Exception {
+    private Object interpretExpr(SlangContext context, SlangReader sr) throws Exception{
         sr.skipWhitespace();
+        if(sr.isNext("null"))return null;
+
+        Object expr = ainterpretExpr(context,sr);
+        if(expr == null)return null;
+        else {
+            //indexer
+            ArrayList<Object> indexerArgs = new ArrayList<Object>();
+
+            if (expr instanceof AbstractList || expr instanceof Map) {
+                sr.skipWhitespace();
+                if (sr.peek() == '[') {
+                    sr.increment();
+                }
+                indexerArgs.add(this.interpretExpr(context, sr));
+                while (true) {
+                    if (sr.peek() == ',') {
+                        sr.increment();
+                        indexerArgs.add(this.interpretExpr(context, sr));
+                    } else if (sr.peek() == ']') {
+                        sr.increment();
+                        break;
+                    }
+                }
+
+                if (expr instanceof AbstractList) {
+                    expr = ((AbstractList) expr).get((int) indexerArgs.get(0));
+                } else {
+                    expr = ((Map) expr).get(indexerArgs.get(0));
+                }
+            }
+        }
+        //operators
+        //TODO
+
+        return expr;
+    }
+    private Object callMethod(SlangContext context, Ref r, ArrayList<Object> args) throws Exception {
+        boolean isEnv = false;
+        if(r instanceof MethodRef){
+            isEnv = ((MethodRef)r).isEnv;
+        }
+        if(isEnv){
+            return SlangEnv.methodDict.get(r.name).run(args.toArray());
+        }else{
+            return this.interpretMethod(r.name,args.toArray());
+        }
+    }
+    private Object getVar(SlangContext context, Ref r) throws SlangException {
+        boolean isParam = false;
+        if(r instanceof VarRef){
+            isParam = ((VarRef)r).isParam;
+        }
+        return (isParam)?context.getParam(r.name):context.getVariable(r.name);
+    }
+    private void setVar(SlangContext context, Ref r, Object o){
+        boolean isParam = false;
+        boolean isGlobal = false;
+        if(r instanceof VarRef){
+            isParam = ((VarRef)r).isParam;
+            isGlobal = ((VarRef)r).isGlobal;
+        }
+        SlangContext c = context;
+        if(isGlobal){
+            c = context;
+            while(c.parentContext != null){
+                c = c.parentContext;
+            }
+        }
+        if(isParam){
+            c.params.remove(r.name);
+            c.params.put(r.name,o);
+        }else{
+            c.variables.remove(r.name);
+            c.variables.put(r.name,o);
+        }
+    }
+    private VarRef readVarRefBase(SlangReader sr){
+        sr.skipWhitespace();
+        VarRef ret = new VarRef(null,false,false);
+        if(sr.peek()=='^'){
+            sr.increment();
+            ret.isGlobal=true;
+        }else if(sr.peek()=='%'){
+            sr.increment();
+            ret.isParam=true;
+        }
+        else return null;
+        return ret;
+    }
+    private MethodRef readMethodRefBase(SlangReader sr){
+        sr.skipWhitespace();
+        MethodRef ret = new MethodRef(null, false);
+        if(sr.peek()=='$') {
+            sr.increment();
+            ret.isEnv = true;
+        }else return null;
+        return ret;
+    }
+
+    private Object ainterpretExpr(SlangContext context, SlangReader sr) throws Exception {
         char c = sr.peek();
         switch (c) {
             case '(':
                 //bracketed expr
                 sr.increment();
-                Object expr = this.interpretExpr(context,sr);
+                Object expr = this.interpretExpr(context, sr);
                 //expect )
-                if(sr.read()!=')')this.throwExec(sr,')');
+                if (sr.read() != ')') this.throwExec(sr, ')');
                 return expr;
             case '[':
                 //list literal
                 sr.increment();
                 ArrayList<Object> ret = new ArrayList<Object>();
-                if(sr.peek()==']'){
+                if (sr.peek() == ']') {
                     sr.increment();
                     return ret; //empty array
-                }else{
-                    ret.add(this.interpretExpr(context,sr));
-                    while(true){
-                        if(sr.peek()==',')ret.add(this.interpretExpr(context,sr));
-                        else if(sr.peek()==']'){
+                } else {
+                    ret.add(this.interpretExpr(context, sr));
+                    while (true) {
+                        if (sr.peek() == ',') {
+                            sr.increment();
+                            ret.add(this.interpretExpr(context, sr));
+                        } else if (sr.peek() == ']') {
                             sr.increment();
                             return ret;
                         }
@@ -219,13 +322,66 @@ public class SlangFile {
             case '"':
                 //string literal
                 return sr.readString();
-            //TODO
             default:
-                if(sr.isNext("null"))return null;
-                else if(sr.isNext())
-                break;
-        }
+                if (sr.isNext("true")) return true;
+                else if (sr.isNext("false")) return false;
+                else {
+                    Object n = sr.readNumber();
+                    if (n != null) return n;
+                    else {
+                        //method call, var get, var set
+                        Ref ref;
+                        if ((ref = readVarRefBase(sr)) == null) {
+                            if ((ref = readMethodRefBase(sr)) == null) {
+                                //neither varrefbase nor methodrefbase
+                                ref = new Ref(null);
+                            }
+                        }
+                        sr.skipWhitespace();//just in case
 
-        return null;
+                        String w = sr.readWord();
+                        if (w == null) throwExec(sr, "Could not interpret expression");
+                        ref.name = w;
+
+                        sr.skipWhitespace();
+
+                        //2nd part if any
+                        if (sr.peek() == '(') {
+                            //methodcall
+                            sr.increment();
+
+                            ArrayList<Object> args = new ArrayList<Object>();
+                            if (sr.peek() == ')') {
+                                sr.increment();
+                                //empty args
+                            } else {
+                                args.add(this.interpretExpr(context, sr));
+                                while (true) {
+                                    if (sr.peek() == ',') {
+                                        sr.increment();
+                                        args.add(this.interpretExpr(context, sr));
+                                    } else if (sr.peek() == ')') {
+                                        sr.increment();
+                                        //done
+                                        break;
+                                    }
+                                }
+                            }
+                            return callMethod(context, ref, args);
+                        } else if (sr.peek() == '=') {
+                            //var set
+                            sr.increment();
+                            Object o = this.interpretExpr(context, sr);
+                            setVar(context, ref, o);
+                            return o;
+
+                        } else {
+                            //var get
+                            return getVar(context, ref);
+                        }
+                    }
+                }
+
+        }
     }
 }
